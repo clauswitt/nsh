@@ -1,0 +1,22 @@
+{
+  "name": "nsh",
+  "version": "0.0.1",
+  "description": "A (for fun) shell in node",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/clauswitt/nsh.git"
+  },
+  "keywords": [
+    "shell"
+  ],
+  "author": "Claus Witt",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/clauswitt/nsh/issues"
+  },
+  "homepage": "https://github.com/clauswitt/nsh"
+}
