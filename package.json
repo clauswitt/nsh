@@ -21,5 +21,8 @@
   "homepage": "https://github.com/clauswitt/nsh",
   "dependencies": {
     "shellwords": "~0.1.0"
+  },
+  "bin": {
+    "nsh": "bin/nsh"
   }
 }

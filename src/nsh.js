@@ -73,5 +73,4 @@ nsh.prototype.run = function(commands) {
   }
 }
 
-var shell = new nsh;
-shell.prompt();
+module.exports = nsh;

@@ -1,0 +1,8 @@
+#!/usr/bin/env node
+
+var path = require('path');
+var fs   = require('fs');
+var src  = path.join(path.dirname(fs.realpathSync(__filename)), '../src');
+var nsh = require(src + '/nsh');
+var shell = new nsh();
+shell.prompt();
