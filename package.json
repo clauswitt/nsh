@@ -18,5 +18,8 @@
   "bugs": {
     "url": "https://github.com/clauswitt/nsh/issues"
   },
-  "homepage": "https://github.com/clauswitt/nsh"
+  "homepage": "https://github.com/clauswitt/nsh",
+  "dependencies": {
+    "shellwords": "~0.1.0"
+  }
 }

@@ -11,8 +11,11 @@ function nsh_prompt() {
   rl.question(' $ ', function(data) {
     process.stdin.pause();
     data = data.split(/ /);
-    require('child_process').spawn(data.shift(), data, {stdio: 'inherit'});
-    process.stdin.resume();
+    var cmd = require('child_process').spawn(data.shift(), data, {stdio: 'inherit'});
+    cmd.on('close', function() {
+      process.stdin.resume();
+      nsh_prompt();
+    });
   });
 }
 
