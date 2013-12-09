@@ -13,15 +13,15 @@ var nsh = function nsh() {
   self = this;
   this.built_ins = {
     'cd': function(path) {
-      console.log('running cd');
+      process.chdir(path[0]);
       self.prompt();
     },
     'pwd': function() {
-      console.log('running pwd');
+      console.log(process.cwd());
       self.prompt();
     },
     'echo': function(msg) {
-      console.log('running echo');
+      console.log(msg.join(' '));
       self.prompt();
     }
   };
