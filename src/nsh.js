@@ -36,23 +36,41 @@ nsh.prototype.prompt = function() {
   });
 }
 
-nsh.prototype.run = function(cmd) {
+nsh.prototype.run = function(commands) {
   var self = this;
-  cmd = shellwords.split(cmd);
-  if(self.built_ins.hasOwnProperty(cmd[0])) {
-    self.built_ins[cmd.shift()](cmd);
-  } else {
-    self.execute_external(cmd.shift(), cmd);
-  }
-}
+  var cmds = commands.split('|'), cmd, current_child, last_child;
 
-nsh.prototype.execute_external = function(cmd, args) {
-    var self = this;
-    var cmd = require('child_process').spawn(cmd, args, {stdio: 'inherit'});
-    cmd.on('close', function() {
-      process.stdin.resume();
-      self.prompt();
-    });
+  for(var i=0;i < cmds.length; i++) {
+    cmd = shellwords.split(cmds[i])
+    if(self.built_ins.hasOwnProperty(cmd[0])) {
+      self.built_ins[cmd.shift()](cmd);
+    } else {
+      current_child = require('child_process').spawn(cmd.shift(), cmd);
+      current_child.stdin.setEncoding('utf8');
+      current_child.stdout.setEncoding('utf8');
+      current_child.stderr.setEncoding('utf8');
+      current_child.stderr.on('data', function(data) {
+        console.log(data);
+      })
+      if(last_child) {
+        last_child.stdout.on('data', function(data) {
+          current_child.stdin.write(data);
+        });
+        last_child.on('close', function(code) {
+          current_child.stdin.end();
+        });
+      }
+      if(i == cmds.length - 1) {
+        current_child.stdout.on('data', function(data) {
+          console.log(data);
+        });
+        current_child.on('close', function(code) {
+          self.prompt();
+        });
+      }
+      last_child = current_child;
+    }
+  }
 }
 
 var shell = new nsh;
