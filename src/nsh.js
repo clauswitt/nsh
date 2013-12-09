@@ -46,42 +46,60 @@ nsh.prototype.run = function(commands) {
 
   for(var i=0;i < cmds.length; i++) {
     cmd = shellwords.split(cmds[i])
-      if(self.built_ins.hasOwnProperty(cmd[0])) {
-        self.built_ins[cmd.shift()](cmd);
-      } else {
-        current_child = require('child_process').spawn(cmd.shift(), cmd, spawn_options);
-        if(!spawn_options) {
-
-          current_child.stdin.setEncoding('utf8');
-          current_child.stdout.setEncoding('utf8');
-          current_child.stderr.setEncoding('utf8');
-          current_child.stderr.on('data', function(data) {
-            console.log(data);
-          })
-          if(last_child) {
-            last_child.stdout.on('data', function(data) {
-              current_child.stdin.write(data);
-            });
-            last_child.on('close', function(code) {
-              current_child.stdin.end();
-            });
-          }
-          if(i == cmds.length - 1) {
-            current_child.stdout.on('data', function(data) {
-              console.log(data);
-            });
-            current_child.on('close', function(code) {
-              self.prompt();
-            });
-          }
-          last_child = current_child;
-        } else {
-          current_child.on('close', function(code) {
-            self.prompt();
-          });
+    if(self.built_ins.hasOwnProperty(cmd[0])) {
+      self.built_ins[cmd.shift()](cmd);
+    } else {
+      last_child = current_child;
+      current_child = require('child_process').spawn(cmd.shift(), cmd, spawn_options);
+      if(cmds.length>1) {
+        self.set_pipes(last_child, current_child);
+        if(i == cmds.length - 1) {
+          self.handle_last_command(current_child);
         }
+      } else {
+        self.listen_for_close_on_last_command(current_child);
       }
+    }
   }
+}
+
+nsh.prototype.set_pipes = function(last_child, current_child) {
+  this.set_encoding_for_pipes(current_child);
+  this.set_output_for_stderr(current_child);
+  if(last_child) {
+    last_child.stdout.on('data', function(data) {
+      current_child.stdin.write(data);
+    });
+    last_child.on('close', function(code) {
+      current_child.stdin.end();
+    });
+  }
+}
+
+nsh.prototype.set_output_for_stderr = function(child) {
+  child.stderr.on('data', function(data) {
+    console.log(data);
+  })
+}
+
+nsh.prototype.set_encoding_for_pipes = function(child) {
+  child.stdin.setEncoding('utf8');
+  child.stdout.setEncoding('utf8');
+  child.stderr.setEncoding('utf8');
+}
+
+nsh.prototype.handle_last_command = function(current_child) {
+  self = this;
+  current_child.stdout.on('data', function(data) {
+    console.log(data);
+  });
+  self.listen_for_close_on_last_command(current_child);
+}
+
+nsh.prototype.listen_for_close_on_last_command = function(current_child) {
+  current_child.on('close', function(code) {
+    self.prompt();
+  });
 }
 
 module.exports = nsh;
